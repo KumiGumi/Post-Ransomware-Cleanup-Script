@@ -1,26 +1,43 @@
 $ransomExtensions = @(".yytw", ".yyza")
-$recoveryFolder = "C:\Recovery"
-$searchPath = "C:\Users"  # Adjust as needed
-$depth = 2  # Adjust as needed
+$recoveryFolder = "C:\RecoveryFolder"
+$searchPath = "."  # Adjust as needed (. is current and all subfolders)
+
 
 if (-not (Test-Path $recoveryFolder)) {
     New-Item -ItemType Directory -Path $recoveryFolder
 }
 
 foreach ($extension in $ransomExtensions) {
-    Get-ChildItem -Path $searchPath -Recurse -Depth $depth | Where-Object { $_.Extension -eq $extension} | ForEach-Object {
-        $destPath = Join-Path $recoveryFolder $_.Name
+    Get-ChildItem -Path $searchPath -Recurse | Where-Object { $_.Extension -eq $extension} | ForEach-Object {
+        $originalPath = Split-Path $_.FullName -Parent
+        #Write-Host "Original Path: $originalPath" ; #Debugging Path
+        #Write-Host "Search Path: $searchPath" ; #Debugging Path
+        $relativePath = $originalPath -replace [regex]::Escape($searchPath), ''
+        #Write-Host "Relative Path: $relativePath" ; #Debugging Path
+        
+        $newFolderPath = Join-Path $recoveryFolder ($originalPath.replace(":", " "))
+        
+        Write-Host "New Folder Path: $newFolderPath" ; #Debugging Path
+        
+        if (-not (Test-Path $newFolderPath)) {
+            New-Item -ItemType Directory -Path $newFolderPath
+            }
+        
+        
+        $destPath = Join-Path $newFolderPath $_.Name
+        
+        
         if (Test-Path $destPath) {
-            Write-Host "File exists in recovery: $_.Name"
+            Write-Host "File exists in recovery: $($_.Name)"
             # Rename or skip
             continue
         }
 
         try {
-            Move-Item $_.FullName -Destination $recoveryFolder
-            Write-Host "Moved: $_.FullName"
+            Move-Item $_.FullName -Destination $destPath
+            Write-Host "Moved: $($_.FullName) to $destPath"
         } catch {
-            Write-Host "Error moving: $_.FullName"
+            Write-Host "Error moving: $($_.FullName)"
         }
     }
 }
