@@ -1,5 +1,5 @@
-$ransomExtensions = @(".yytw", ".yyza")
-$recoveryFolder = "C:\RecoveryFolder"
+$ransomExtensions = @(".yytw", ".yyza") # Adjust as needed
+$recoveryFolder = "C:\RecoveryFolder" # Adjust as need
 $searchPath = "."  # Adjust as needed (. is current and all subfolders)
 
 
@@ -10,10 +10,10 @@ if (-not (Test-Path $recoveryFolder)) {
 foreach ($extension in $ransomExtensions) {
     Get-ChildItem -Path $searchPath -Recurse | Where-Object { $_.Extension -eq $extension} | ForEach-Object {
         $originalPath = Split-Path $_.FullName -Parent
-        #Write-Host "Original Path: $originalPath" ; #Debugging Path
-        #Write-Host "Search Path: $searchPath" ; #Debugging Path
+            # Write-Host "Original Path: $originalPath" ; #Debugging Path
+            # Write-Host "Search Path: $searchPath" ; #Debugging Path
         $relativePath = $originalPath -replace [regex]::Escape($searchPath), ''
-        #Write-Host "Relative Path: $relativePath" ; #Debugging Path
+            # Write-Host "Relative Path: $relativePath" ; #Debugging Path
         
         $newFolderPath = Join-Path $recoveryFolder ($originalPath.replace(":", " "))
         
